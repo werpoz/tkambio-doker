@@ -1,0 +1,55 @@
+version: "3.7" # version del docker-compose(?)
+services: 
+  nginx:
+    image: nginx:stable-alpine 
+    container_name: nginx
+    ports:
+      - 80:80 
+    volumes:
+      - ./backend:/var/www/html/backend #local/container
+      - ./setting/default.conf:/etc/nginx/conf.d/default.conf #local/container
+    depends_on:
+      - php
+      - mysql
+    networks:
+      - laravel
+  mysql:
+    image: mysql:5.7
+    container_name: tkambio-mysql
+    restart: unless-stopped 
+    tty: true
+    ports: 
+      - 33069:3306
+    volumes:
+      - ./mysql:/var/lib/mysql
+    environment: 
+      MYSQL_DATABASE: 'tkambio' 
+      MYSQL_USER: 'tkambio'
+      MYSQL_PASSWORD: 'secret'
+      MYSQL_ROOT_PASSWORD: 'secret'
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    networks:
+      - laravel
+  php:
+    build: 
+      context: . 
+      dockerfile:  ./php/Dockerfile 
+    container_name: tkambio-php 
+    volumes:
+      - ./backend:/var/www/html/backend
+    ports:
+      - 9000:80
+    networks:
+      - laravel
+  node:
+    build:
+      context: .
+      dockerfile: ./node/Dockerfile
+    command: node /var/html/frontend/index.js
+    volumes:
+      - ./frontend:/var/html/frontend
+    ports:
+      - 3000:3000
+networks: 
+  laravel:
