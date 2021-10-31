@@ -46,10 +46,11 @@ services:
     build:
       context: .
       dockerfile: ./node/Dockerfile
-    command: node /var/html/frontend/index.js
     volumes:
       - ./frontend:/var/html/frontend
+    tty: true
     ports:
       - 3000:3000
+    command: npm run dev
 networks: 
   laravel:
